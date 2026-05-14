@@ -548,11 +548,14 @@ def main() -> None:
             """
 ・タブ名は「Versant」(大文字小文字関係なし) or 「Casec」(大文字小文字関係なし)の文字列を含むもの
 
-・列は『ID』、『学習頻度』、『学習期間』、『学習日数』、『〇〇_Pre』、『〇〇_Post』、『〇〇_Post-Pre』、『Initial_Level』の8列
+・列は次の８列の構成：『ID』、『学習頻度』、『学習期間』、『学習日数』、『〇〇_Pre』、『〇〇_Post』、『〇〇_Post-Pre』、『Initial_Level』
 
-・ID列は必ず情報が必要、他の列は空欄でも可能。
+・ID列は必ず情報が必要
+
+・ID列以外の他の列は空欄でも可
 """
         )
+        st.markdown("")
         st.markdown("")
 
         uploaded = st.file_uploader("Excelファイル（.xlsx）", type=["xlsx"], key="excel_uploader_main")
