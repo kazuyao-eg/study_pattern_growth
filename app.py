@@ -335,7 +335,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
 
     st.dataframe(wide_display, use_container_width=True)
     st.caption("※分散・・・データの散らばり具合を表します。数値が大きいほどデータが散らばっています。")
-    st.caption("該当人数が1人以下の場合は分散と相関係数は算出されません。")
+    st.caption("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
     _download_csv_button(
         wide_display.reset_index().rename(columns={"index": "metric"}),
         "tab2_summary.csv",
