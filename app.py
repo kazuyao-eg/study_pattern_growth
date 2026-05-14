@@ -542,15 +542,15 @@ def main() -> None:
     )
 
     with tabs[0]:
-        st.header("下記の形式のエクセルファイルをアップロードしてください。")
+        st.write("下記の形式のエクセルファイルをアップロードしてください。")
         st.markdown(
-            """
+            ""
 ・タブ名は「Versant」(大文字小文字関係なし) or 「Casec」(大文字小文字関係なし)の文字列を含みます。
 
 ・列は『ID』、『学習頻度』、『学習期間』、『学習日数』、『〇〇_Pre』、『〇〇_Post』、『〇〇_Post-Pre』、『Initial_Level』の8列。
 
 ・ID列は必ず情報が必要、他の列は空欄でも可能。
-"""
+""
         )
 
         uploaded = st.file_uploader("Excelファイル（.xlsx）", type=["xlsx"], key="excel_uploader_main")
