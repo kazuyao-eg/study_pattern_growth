@@ -543,6 +543,7 @@ def main() -> None:
 
     with tabs[0]:
         st.subheader("下記の形式のエクセルファイルをアップロードしてください。")
+        st.markdown("")
         st.markdown(
             """
 ・タブ名は「Versant」(大文字小文字関係なし) or 「Casec」(大文字小文字関係なし)の文字列を含むもの
@@ -552,6 +553,7 @@ def main() -> None:
 ・ID列は必ず情報が必要、他の列は空欄でも可能。
 """
         )
+        st.markdown("")
 
         uploaded = st.file_uploader("Excelファイル（.xlsx）", type=["xlsx"], key="excel_uploader_main")
         if uploaded is None:
