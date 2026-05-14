@@ -563,7 +563,7 @@ def main() -> None:
             st.stop()
 
         df = result.df
-        st.success(f"読み込み完了: {len(df):,} 行")
+        st.success(f"読み込み完了")
         if result.skipped_sheets:
             st.caption(f"読み飛ばしたタブ: {', '.join(result.skipped_sheets)}")
         ##st.dataframe(df, use_container_width=True)
