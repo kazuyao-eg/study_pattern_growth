@@ -544,17 +544,11 @@ def main() -> None:
     with tabs[0]:
         st.subheader("下記の形式のエクセルファイルをアップロードしてください。")
         st.markdown("")
-        st.markdown(
-            """
-・タブ名は「Versant」(大文字小文字関係なし) or 「Casec」(大文字小文字関係なし)の文字列を含むもの
-
-・列は次の８列の構成：『ID』、『学習頻度』、『学習期間』、『学習日数』、『〇〇_Pre』、『〇〇_Post』、『〇〇_Post-Pre』、『Initial_Level』
-
-・ID列は必ず情報が必要
-
-・ID列以外の他の列は空欄でも可
-"""
-        )
+        st.markdown("　・タブ名は「Versant」(大文字小文字関係なし) or 「Casec」(大文字小文字関係なし)の文字列を含むもの")
+        st.markdown("　・列は次の８列の構成：『ID』、『学習頻度』、『学習期間』、『学習日数』、『〇〇_Pre』、『〇〇_Post』、『〇〇_Post-Pre』、『Initial_Level』
+")
+        st.markdown("　・ID列は必ず情報が必要")
+        st.markdown("　・ID列以外の他の列は空欄でも可")
         st.markdown("")
         st.markdown("")
 
