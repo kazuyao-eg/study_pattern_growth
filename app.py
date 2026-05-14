@@ -566,8 +566,8 @@ def main() -> None:
         st.success(f"読み込み完了: {len(df):,} 行")
         if result.skipped_sheets:
             st.caption(f"読み飛ばしたタブ: {', '.join(result.skipped_sheets)}")
-        st.dataframe(df, use_container_width=True)
-        _download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
+        ##st.dataframe(df, use_container_width=True)
+        ##_download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
         st.session_state["normalized_df"] = df
 
     df_all = st.session_state.get("normalized_df")
