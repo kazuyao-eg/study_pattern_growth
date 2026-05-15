@@ -561,17 +561,17 @@ def main() -> None:
         if result.error:
             st.error(result.error)
             if result.loaded_sheets:
-                st.caption(f"読み込んだタブ名: {', '.join(result.loaded_sheets)}")
+                st.markdown(f"読み込んだタブ名: {', '.join(result.loaded_sheets)}")
             if result.skipped_sheets:
-                st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
+                st.markdown(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
             st.stop()
 
         df = result.df
         st.success(f"読み込み完了")
         if result.loaded_sheets:
-            st.caption(f"読み込んだタブ名: {', '.join(result.loaded_sheets)}")
+            st.markdown(f"読み込んだタブ名: {', '.join(result.loaded_sheets)}")
         if result.skipped_sheets:
-            st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
+            st.markdown(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
         ##st.dataframe(df, use_container_width=True)
         ##_download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
         st.session_state["normalized_df"] = df
