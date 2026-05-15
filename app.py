@@ -60,6 +60,22 @@ def _clean_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _score_column_rename_map(columns) -> dict:
+    """列名末尾の *Post_Pre / *Post / *Pre を Post_Pre / Post / Pre に統一（test_type 非依存）。"""
+    rename_map = {}
+    for col in columns:
+        c = str(col)
+        if c in ("Pre", "Post", "Post_Pre"):
+            continue
+        if c.endswith("_Post_Pre"):
+            rename_map[col] = "Post_Pre"
+        elif c.endswith("_Post"):
+            rename_map[col] = "Post"
+        elif c.endswith("_Pre"):
+            rename_map[col] = "Pre"
+    return rename_map
+
+
 def _sheet_test_type(sheet_name: str) -> Optional[str]:
     s = str(sheet_name).lower()
     if "versant" in s:
@@ -122,20 +138,7 @@ def build_table_from_excel(uploaded) -> BuildResult:
         raw = _clean_columns(raw)
         raw["Test_Type"] = test_type
 
-        if test_type == "Versant":
-            rename_map = {
-                "Versant_Pre": "Pre",
-                "Versant_Post": "Post",
-                "Versant_Post_Pre": "Post_Pre",
-            }
-        else:
-            rename_map = {
-                "CASEC_Total_Pre": "Pre",
-                "CASEC_Total_Post": "Post",
-                "CASEC_Total_Post_Pre": "Post_Pre",
-            }
-
-        raw = raw.rename(columns=rename_map)
+        raw = raw.rename(columns=_score_column_rename_map(raw.columns))
 
         required_before_eff = [
             "ID",
