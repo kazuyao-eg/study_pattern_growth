@@ -105,7 +105,7 @@ def build_table_from_excel(uploaded) -> BuildResult:
     try:
         xl = pd.ExcelFile(uploaded)
     except Exception:
-        return BuildResult(df=None, error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)", skipped_sheets=[])
+        return BuildResult(df=None, error="アップロードされたファイルに誤りがあります。正しい形式のExcelファイルをアップロードしてください。", skipped_sheets=[])
 
     tables: List[pd.DataFrame] = []
     skipped: List[str] = []
@@ -161,14 +161,14 @@ def build_table_from_excel(uploaded) -> BuildResult:
         tables.append(df)
 
     if not tables:
-        return BuildResult(df=None, error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)", skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。", skipped_sheets=skipped)
 
     out = pd.concat(tables, axis=0, ignore_index=True)
     if list(out.columns) != FINAL_COLS:
-        return BuildResult(df=None, error="入力データに誤りがあります。列名、列構成が正しいかを確認してください。)", skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。)", skipped_sheets=skipped)
 
     if out.isna().all(axis=None):
-        return BuildResult(df=None, error="入力データに誤りがあります。ファイル内に有効なデータがありません。", skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。ファイル内に有効なデータがありません。", skipped_sheets=skipped)
 
     return BuildResult(df=out, error=None, skipped_sheets=skipped)
 
