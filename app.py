@@ -165,13 +165,13 @@ def build_table_from_excel(uploaded) -> BuildResult:
 
     out = pd.concat(tables, axis=0, ignore_index=True)
     if list(out.columns) != FINAL_COLS:
-        return BuildResult(df=None, error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)", skipped_sheets=skipped)
+        return BuildResult(df=None, error="入力データに誤りがあります。列名、列構成が正しいかを確認してください。)", skipped_sheets=skipped)
 
     if out.isna().all(axis=None):
-        return BuildResult(df=None, error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)", skipped_sheets=skipped)
+        return BuildResult(df=None, error="入力データに誤りがあります。ファイル内に有効なデータがありません。", skipped_sheets=skipped)
 
     if out["ID"].isna().all():
-        return BuildResult(df=None, error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)", skipped_sheets=skipped)
+        return BuildResult(df=None, error="入力データに誤りがあります。「ID」列が空欄の行があります。", skipped_sheets=skipped)
 
     return BuildResult(df=out, error=None, skipped_sheets=skipped)
 
@@ -559,13 +559,13 @@ def main() -> None:
         if result.error:
             st.error(result.error)
             if result.skipped_sheets:
-                st.caption(f"読み飛ばしたタブ: {', '.join(result.skipped_sheets)}")
+                st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
             st.stop()
 
         df = result.df
         st.success(f"読み込み完了")
         if result.skipped_sheets:
-            st.caption(f"読み飛ばしたタブ: {', '.join(result.skipped_sheets)}")
+            st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
         ##st.dataframe(df, use_container_width=True)
         ##_download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
         st.session_state["normalized_df"] = df
