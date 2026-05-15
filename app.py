@@ -542,8 +542,8 @@ def main() -> None:
         st.subheader("下記の形式のExcelファイルをアップロードしてください")
         st.markdown("")
         st.markdown("<div style='margin-left:20px;'>・タブ名：「Versant」(大文字小文字関係なし) もしくは 「Casec」(大文字小文字関係なし)を含むもの。「VERSANT①」などでもOK。</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・表は８列構成：「ID」、「学習頻度」、「学習期間」、「学習日数」、「〇〇_Pre」、「〇〇_Post」、「〇〇_Post-Pre」、「Initial_Level」</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・空欄（NULL）がないExcelファイルを想定</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・Excelファイル内の表は８列構成：「ID」、「学習頻度」、「学習期間」、「学習日数」、「〇〇_Pre」、「〇〇_Post」、「〇〇_Post-Pre」、「Initial_Level」</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・Excelファイル内の表に空欄（NULL）の列がなし</div>",unsafe_allow_html=True)
         st.markdown("")
         st.markdown("")
 
