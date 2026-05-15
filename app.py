@@ -170,6 +170,9 @@ def build_table_from_excel(uploaded) -> BuildResult:
     if out.isna().all(axis=None):
         return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。ファイル内に有効なデータがありません。", skipped_sheets=skipped)
 
+    if out.isna().any(axis=None):
+        return BuildResult(df=None,error="アップロードされたExcelファイルに空欄セルがあります。", skipped_sheets=skipped)
+
     return BuildResult(df=out, error=None, skipped_sheets=skipped)
 
 
@@ -543,7 +546,7 @@ def main() -> None:
         st.markdown("")
         st.markdown("<div style='margin-left:20px;'>・タブ名：「Versant」(大文字小文字関係なし) もしくは 「Casec」(大文字小文字関係なし)を含むもの。「VERSANT①」などでもOK。</div>",unsafe_allow_html=True)
         st.markdown("<div style='margin-left:20px;'>・Excelファイル内の表は８列構成：「ID」、「学習頻度」、「学習期間」、「学習日数」、「〇〇_Pre」、「〇〇_Post」、「〇〇_Post-Pre」、「Initial_Level」</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・Excelファイル内の表に空欄（NULL）の列がなし</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・Excelファイル内の表に空欄（NULL）の列なし</div>",unsafe_allow_html=True)
         st.markdown("")
         st.markdown("")
 
