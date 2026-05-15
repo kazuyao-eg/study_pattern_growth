@@ -92,6 +92,7 @@ def _pearson(x: pd.Series, y: pd.Series) -> float:
 class BuildResult:
     df: Optional[pd.DataFrame]
     error: Optional[str]
+    loaded_sheets: List[str]
     skipped_sheets: List[str]
 
 
@@ -105,9 +106,10 @@ def build_table_from_excel(uploaded) -> BuildResult:
     try:
         xl = pd.ExcelFile(uploaded)
     except Exception:
-        return BuildResult(df=None, error="アップロードされたファイルに誤りがあります。正しい形式のExcelファイルをアップロードしてください。", skipped_sheets=[])
+        return BuildResult(df=None, error="アップロードされたファイルに誤りがあります。正しい形式のExcelファイルをアップロードしてください。", loaded_sheets=[], skipped_sheets=[])
 
     tables: List[pd.DataFrame] = []
+    loaded: List[str] = []
     skipped: List[str] = []
 
     for sheet in xl.sheet_names:
@@ -159,21 +161,22 @@ def build_table_from_excel(uploaded) -> BuildResult:
 
         df = df[FINAL_COLS].copy()
         tables.append(df)
+        loaded.append(str(sheet))
 
     if not tables:
-        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。", skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。", loaded_sheets=loaded, skipped_sheets=skipped)
 
     out = pd.concat(tables, axis=0, ignore_index=True)
     if list(out.columns) != FINAL_COLS:
-        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。)", skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。)", loaded_sheets=loaded, skipped_sheets=skipped)
 
     if out.isna().all(axis=None):
-        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。ファイル内に有効なデータがありません。", skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。ファイル内に有効なデータがありません。", loaded_sheets=loaded, skipped_sheets=skipped)
 
     if out.isna().any(axis=None):
-        return BuildResult(df=None,error="アップロードされたExcelファイルに空欄セルがあります。", skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに空欄セルがあります。", loaded_sheets=loaded, skipped_sheets=skipped)
 
-    return BuildResult(df=out, error=None, skipped_sheets=skipped)
+    return BuildResult(df=out, error=None, loaded_sheets=loaded, skipped_sheets=skipped)
 
 
 def _is_numeric_series(s: pd.Series) -> bool:
@@ -557,12 +560,16 @@ def main() -> None:
         result = build_table_from_excel(uploaded)
         if result.error:
             st.error(result.error)
+            if result.loaded_sheets:
+                st.caption(f"読み込んだタブ: {', '.join(result.loaded_sheets)}")
             if result.skipped_sheets:
                 st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
             st.stop()
 
         df = result.df
         st.success(f"読み込み完了")
+        if result.loaded_sheets:
+            st.caption(f"読み込んだタブ: {', '.join(result.loaded_sheets)}")
         if result.skipped_sheets:
             st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
         ##st.dataframe(df, use_container_width=True)
