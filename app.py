@@ -9,7 +9,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-EFFICIENCY_COL = "学習効率(点数変化/学習日数)"
+EFFICIENCY_COL = "学習効率（点数変化/学習日数）"
 
 FINAL_COLS = [
     "ID",
@@ -60,22 +60,6 @@ def _clean_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _score_column_rename_map(columns) -> dict:
-    """列名末尾の *Post_Pre / *Post / *Pre を Post_Pre / Post / Pre に統一（test_type 非依存）。"""
-    rename_map = {}
-    for col in columns:
-        c = str(col)
-        if c in ("Pre", "Post", "Post_Pre"):
-            continue
-        if c.endswith("_Post_Pre"):
-            rename_map[col] = "Post_Pre"
-        elif c.endswith("_Post"):
-            rename_map[col] = "Post"
-        elif c.endswith("_Pre"):
-            rename_map[col] = "Pre"
-    return rename_map
-
-
 def _sheet_test_type(sheet_name: str) -> Optional[str]:
     s = str(sheet_name).lower()
     if "versant" in s:
@@ -122,12 +106,7 @@ def build_table_from_excel(uploaded) -> BuildResult:
     try:
         xl = pd.ExcelFile(uploaded)
     except Exception:
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=[],
-            skipped_sheets=[],
-        )
+        return BuildResult(df=None, error="アップロードされたファイルに誤りがあります。正しい形式のExcelファイルをアップロードしてください。", loaded_sheets=[], skipped_sheets=[])
 
     tables: List[pd.DataFrame] = []
     loaded: List[str] = []
@@ -142,7 +121,21 @@ def build_table_from_excel(uploaded) -> BuildResult:
         raw = xl.parse(sheet)
         raw = _clean_columns(raw)
         raw["Test_Type"] = test_type
-        raw = raw.rename(columns=_score_column_rename_map(raw.columns))
+
+        if test_type == "Versant":
+            rename_map = {
+                "Versant_Pre": "Pre",
+                "Versant_Post": "Post",
+                "Versant_Post_Pre": "Post_Pre",
+            }
+        else:
+            rename_map = {
+                "CASEC_Total_Pre": "Pre",
+                "CASEC_Total_Post": "Post",
+                "CASEC_Total_Post_Pre": "Post_Pre",
+            }
+
+        raw = raw.rename(columns=rename_map)
 
         required_before_eff = [
             "ID",
@@ -171,37 +164,17 @@ def build_table_from_excel(uploaded) -> BuildResult:
         loaded.append(str(sheet))
 
     if not tables:
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。", loaded_sheets=loaded, skipped_sheets=skipped)
 
     out = pd.concat(tables, axis=0, ignore_index=True)
     if list(out.columns) != FINAL_COLS:
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。)", loaded_sheets=loaded, skipped_sheets=skipped)
 
     if out.isna().all(axis=None):
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。ファイル内に有効なデータがありません。", loaded_sheets=loaded, skipped_sheets=skipped)
 
-    if out["ID"].isna().all():
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+    if out.isna().any(axis=None):
+        return BuildResult(df=None, error="アップロードされたExcelファイルに空欄セルがあります。", loaded_sheets=loaded, skipped_sheets=skipped)
 
     return BuildResult(df=out, error=None, loaded_sheets=loaded, skipped_sheets=skipped)
 
@@ -364,7 +337,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
         wide_display.loc["該当人数"] = wide_display.loc["該当人数"].astype(int)
 
     st.dataframe(wide_display, use_container_width=True)
-    st.caption("※分散・・・データの散らばり具合を表します。数値が大きいほどデータが散らばっています。")
+    st.caption("※分散・・・データの散らばり具合を表します。分散の値が大きいほどデータが散らばっています。")
     st.caption("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
     _download_csv_button(
         wide_display.reset_index().rename(columns={"index": "metric"}),
@@ -572,12 +545,12 @@ def main() -> None:
     )
 
     with tabs[0]:
-        st.subheader("下記の形式のエクセルファイルをアップロードしてください。")
+        st.subheader("下記の形式のExcelファイルを1つアップロードしてください")
         st.markdown("")
-        st.markdown("<div style='margin-left:20px;'>・タブ名は「Versant」(大文字小文字関係なし) or 「Casec」(大文字小文字関係なし)の文字列を含むもの</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・列は次の８列の構成：『ID』、『学習頻度』、『学習期間』、『学習日数』、『〇〇_Pre』、『〇〇_Post』、『〇〇_Post-Pre』、『Initial_Level』</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・ID列は必ず情報が必要</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・ID列以外の他の列は空欄でも可</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・タブ名：「Versant」(大文字小文字どちらも可) もしくは 「Casec」(大文字小文字どちらも可)を含むもの。「VERSANT①」などでもOK。</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・表は８列構成：「ID」、「学習頻度」、「学習期間」、「学習日数」、「〇〇_Pre」、「〇〇_Post」、「〇〇_Post-Pre」、「Initial_Level」</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・表に空欄（NULL）の列なし</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・アップロードできるExcelファイルは１つのみ</div>",unsafe_allow_html=True)
         st.markdown("")
         st.markdown("")
 
@@ -589,19 +562,19 @@ def main() -> None:
         if result.error:
             st.error(result.error)
             if result.loaded_sheets:
-                st.caption(f"読み込んだタブ: {', '.join(result.loaded_sheets)}")
+                st.caption(f"読み込んだタブ名: {'、'.join(result.loaded_sheets)}")
             if result.skipped_sheets:
-                st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
+                st.caption(f"読み飛ばしたタブ名: {'、'.join(result.skipped_sheets)}")
             st.stop()
 
         df = result.df
-        st.success(f"読み込み完了: {len(df):,} 行")
+        st.success(f"読み込み完了")
         if result.loaded_sheets:
-            st.caption(f"読み込んだタブ: {', '.join(result.loaded_sheets)}")
+            st.caption(f"読み込んだタブ名: {'、'.join(result.loaded_sheets)}")
         if result.skipped_sheets:
-            st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
-        st.dataframe(df, use_container_width=True)
-        _download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
+            st.caption(f"読み飛ばしたタブ名: {'、'.join(result.skipped_sheets)}")
+        ##st.dataframe(df, use_container_width=True)
+        ##_download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
         st.session_state["normalized_df"] = df
 
     df_all = st.session_state.get("normalized_df")
