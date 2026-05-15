@@ -170,9 +170,6 @@ def build_table_from_excel(uploaded) -> BuildResult:
     if out.isna().all(axis=None):
         return BuildResult(df=None, error="入力データに誤りがあります。ファイル内に有効なデータがありません。", skipped_sheets=skipped)
 
-    if out["ID"].isna().all():
-        return BuildResult(df=None, error="入力データに誤りがあります。「ID」列が空欄の行があります。", skipped_sheets=skipped)
-
     return BuildResult(df=out, error=None, skipped_sheets=skipped)
 
 
