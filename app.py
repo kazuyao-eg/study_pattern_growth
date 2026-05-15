@@ -92,7 +92,6 @@ def _pearson(x: pd.Series, y: pd.Series) -> float:
 class BuildResult:
     df: Optional[pd.DataFrame]
     error: Optional[str]
-    loaded_sheets: List[str]
     skipped_sheets: List[str]
 
 
@@ -106,15 +105,9 @@ def build_table_from_excel(uploaded) -> BuildResult:
     try:
         xl = pd.ExcelFile(uploaded)
     except Exception:
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=[],
-            skipped_sheets=[],
-        )
+        return BuildResult(df=None, error="アップロードされたファイルに誤りがあります。正しい形式のExcelファイルをアップロードしてください。", skipped_sheets=[])
 
     tables: List[pd.DataFrame] = []
-    loaded: List[str] = []
     skipped: List[str] = []
 
     for sheet in xl.sheet_names:
@@ -166,42 +159,21 @@ def build_table_from_excel(uploaded) -> BuildResult:
 
         df = df[FINAL_COLS].copy()
         tables.append(df)
-        loaded.append(str(sheet))
 
     if not tables:
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。", skipped_sheets=skipped)
 
     out = pd.concat(tables, axis=0, ignore_index=True)
     if list(out.columns) != FINAL_COLS:
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。)", skipped_sheets=skipped)
 
     if out.isna().all(axis=None):
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。ファイル内に有効なデータがありません。", skipped_sheets=skipped)
 
-    if out["ID"].isna().all():
-        return BuildResult(
-            df=None,
-            error="入力データに誤りがあります(列名が正しいか、中身があるかを確認)",
-            loaded_sheets=loaded,
-            skipped_sheets=skipped,
-        )
+    if out.isna().any(axis=None):
+        return BuildResult(df=None,error="アップロードされたExcelファイルに空欄セルがあります。", skipped_sheets=skipped)
 
-    return BuildResult(df=out, error=None, loaded_sheets=loaded, skipped_sheets=skipped)
+    return BuildResult(df=out, error=None, skipped_sheets=skipped)
 
 
 def _is_numeric_series(s: pd.Series) -> bool:
@@ -362,8 +334,8 @@ def _tab2_summary(df: pd.DataFrame) -> None:
         wide_display.loc["該当人数"] = wide_display.loc["該当人数"].astype(int)
 
     st.dataframe(wide_display, use_container_width=True)
-    st.caption("※分散・・・データの散らばり具合を表します。数値が大きいほどデータが散らばっています。")
-    st.caption("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
+    st.markdown("※分散・・・データの散らばり具合を表します。数値が大きいほどデータが散らばっています。")
+    st.markdown("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
     _download_csv_button(
         wide_display.reset_index().rename(columns={"index": "metric"}),
         "tab2_summary.csv",
@@ -570,12 +542,11 @@ def main() -> None:
     )
 
     with tabs[0]:
-        st.subheader("下記の形式のエクセルファイルをアップロードしてください。")
+        st.subheader("下記の形式のExcelファイルをアップロードしてください")
         st.markdown("")
-        st.markdown("<div style='margin-left:20px;'>・タブ名は「Versant」(大文字小文字関係なし) or 「Casec」(大文字小文字関係なし)の文字列を含むもの</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・列は次の８列の構成：『ID』、『学習頻度』、『学習期間』、『学習日数』、『〇〇_Pre』、『〇〇_Post』、『〇〇_Post-Pre』、『Initial_Level』</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・ID列は必ず情報が必要</div>",unsafe_allow_html=True)
-        st.markdown("<div style='margin-left:20px;'>・ID列以外の他の列は空欄でも可</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・タブ名：「Versant」(大文字小文字関係なし) もしくは 「Casec」(大文字小文字関係なし)を含むもの。「VERSANT①」などでもOK。</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・Excelファイル内の表は８列構成：「ID」、「学習頻度」、「学習期間」、「学習日数」、「〇〇_Pre」、「〇〇_Post」、「〇〇_Post-Pre」、「Initial_Level」</div>",unsafe_allow_html=True)
+        st.markdown("<div style='margin-left:20px;'>・Excelファイル内の表に空欄（NULL）の列なし</div>",unsafe_allow_html=True)
         st.markdown("")
         st.markdown("")
 
@@ -586,20 +557,16 @@ def main() -> None:
         result = build_table_from_excel(uploaded)
         if result.error:
             st.error(result.error)
-            if result.loaded_sheets:
-                st.caption(f"読み込んだタブ: {', '.join(result.loaded_sheets)}")
             if result.skipped_sheets:
                 st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
             st.stop()
 
         df = result.df
-        st.success(f"読み込み完了: {len(df):,} 行")
-        if result.loaded_sheets:
-            st.caption(f"読み込んだタブ: {', '.join(result.loaded_sheets)}")
+        st.success(f"読み込み完了")
         if result.skipped_sheets:
             st.caption(f"読み飛ばしたタブ名: {', '.join(result.skipped_sheets)}")
-        st.dataframe(df, use_container_width=True)
-        _download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
+        ##st.dataframe(df, use_container_width=True)
+        ##_download_csv_button(df, "normalized_table.csv", "整形後テーブルをCSVでダウンロード")
         st.session_state["normalized_df"] = df
 
     df_all = st.session_state.get("normalized_df")
