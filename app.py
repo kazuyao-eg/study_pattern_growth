@@ -343,7 +343,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
     st.caption("※「点数変化」と「相関係数を算出する項目」で選んだ項目の相関係数が表示されています。")
     st.caption("※分散はデータの散らばり具合を表し、値が大きいほどデータが散らばっています。")
     st.caption("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
-    st.caption("※「列を選択する」で「Pre」、「Post」、「Pre-Post」を選択した際、列の境界と一致する値は左側の列に属します。例：列が「0-10」「10-20」、、の時は「10」の値は「0-10」に属する。")
+    st.caption("※「列を選択する」で「学習日数」、「Pre」、「Post」、「Pre-Post」のいずれかを選択した際、列の境界と一致する値は左側の列に属します。例：列が「0-10」「10-20」、、の時は「10」の値は「0-10」に属する。")
     _download_csv_button(
         wide_display.reset_index().rename(columns={"index": "metric"}),
         "tab2_summary.csv",
