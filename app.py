@@ -328,10 +328,10 @@ def _tab2_summary(df: pd.DataFrame) -> None:
 
     m = pd.DataFrame(rows).set_index("group")
     wide = m[["n_ids", "pct", "median", "mean", "var", "pearson"]].T
-    wide.index = ["該当人数", "全体に対する人数割合（％）", "点数変化の中央値", "点数変化の平均", "点数変化の分散", "相関係数（ピアソン）"]
+    wide.index = ["該当人数", "全体に対する人数割合（％）", "点数変化の中央値", "スコアアップの平均値", "スコアアップの分散", "スコアアップとの相関係数（ピアソン）"]
 
     wide_display = wide.copy()
-    for r in ["全体に対する人数割合（％）", "点数変化の中央値", "点数変化の平均", "点数変化の分散", "相関係数（ピアソン）"]:
+    for r in ["全体に対する人数割合（％）", "スコアアップの中央値", "スコアアップの平均値", "スコアアップの分散", "スコアアップとの相関係数（ピアソン）"]:
         if r in wide_display.index:
             wide_display.loc[r] = wide_display.loc[r].map(
                 lambda v: np.nan if (isinstance(v, float) and np.isnan(v)) else _round_half_up_2(v)
