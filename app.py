@@ -191,7 +191,7 @@ def _apply_filters(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
 
     test_types = sorted([x for x in out["Test_Type"].dropna().unique().tolist() if str(x) != ""])
-    selected_types = st.sidebar.multiselect("全体のスイッチ（Test_Type）", options=test_types, default=test_types)
+    selected_types = st.sidebar.multiselect("テストの種類", options=test_types, default=test_types)
     if selected_types:
         out = out[out["Test_Type"].isin(selected_types)]
 
