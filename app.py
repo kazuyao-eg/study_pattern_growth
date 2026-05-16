@@ -104,28 +104,6 @@ def _pearson(x: pd.Series, y: pd.Series) -> float:
     return float(x[mask].corr(y[mask], method="pearson"))
 
 
-def _format_matching_row_labels(sub: pd.DataFrame) -> str:
-    return ", ".join(str(i) for i in sub.index.tolist())
-
-
-def _format_pp_contents(pp: pd.Series) -> str:
-    parts = []
-    for v in pp.values:
-        if pd.isna(v):
-            parts.append("nan")
-            continue
-        try:
-            fv = float(v)
-        except (TypeError, ValueError):
-            parts.append(str(v))
-            continue
-        if np.isfinite(fv):
-            parts.append(str(_round_half_up_2(fv)))
-        else:
-            parts.append(str(v))
-    return ", ".join(parts)
-
-
 @dataclass(frozen=True)
 class BuildResult:
     df: Optional[pd.DataFrame]
@@ -213,7 +191,7 @@ def _apply_filters(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
 
     test_types = sorted([x for x in out["Test_Type"].dropna().unique().tolist() if str(x) != ""])
-    selected_types = st.sidebar.multiselect("全体のスイッチ（Test_Type）", options=test_types, default=test_types)
+    selected_types = st.sidebar.multiselect("テストの種類", options=test_types, default=test_types)
     if selected_types:
         out = out[out["Test_Type"].isin(selected_types)]
 
@@ -349,28 +327,15 @@ def _tab2_summary(df: pd.DataFrame) -> None:
                 "mean": float(np.nanmean(pp.values)) if pp.notna().any() else np.nan,
                 "var": float(np.nanvar(pp.values, ddof=1)) if pp.notna().sum() >= 2 else np.nan,
                 "pearson": _pearson(sub["Post_Pre"], sub["学習日数"]),
-                "_sub_row_labels": _format_matching_row_labels(sub),
-                "_pp_contents": _format_pp_contents(pp),
             }
         )
 
     m = pd.DataFrame(rows).set_index("group")
-    wide = m[
-        ["n_ids", "pct", "median", "mean", "var", "pearson", "_sub_row_labels", "_pp_contents"]
-    ].T
-    wide.index = [
-        "該当人数",
-        "全体に対する割合（％）",
-        "中央値",
-        "平均",
-        "分散",
-        "相関係数（ピアソン）",
-        "該当する行",
-        "ppの中身",
-    ]
+    wide = m[["n_ids", "pct", "median", "mean", "var", "pearson"]].T
+    wide.index = ["該当人数", "全体に対する割合（％）", "点数変化の中央値", "点数変化の平均", "点数変化の分散", "相関係数（ピアソン）"]
 
     wide_display = wide.copy()
-    for r in ["全体に対する割合（％）", "中央値", "平均", "分散", "相関係数（ピアソン）"]:
+    for r in ["全体に対する割合（％）", "点数変化の中央値", "点数変化の平均", "点数変化の分散", "相関係数（ピアソン）"]:
         if r in wide_display.index:
             wide_display.loc[r] = wide_display.loc[r].map(
                 lambda v: np.nan if (isinstance(v, float) and np.isnan(v)) else _round_half_up_2(v)
@@ -381,7 +346,6 @@ def _tab2_summary(df: pd.DataFrame) -> None:
     st.dataframe(wide_display, use_container_width=True)
     st.caption("※分散・・・データの散らばり具合を表します。分散の値が大きいほどデータが散らばっています。")
     st.caption("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
-    st.caption("※列の境界と一致する値は左側の列に属します。例：列が「0-10」「10-20」、、、の時は「10」の値は「0-10」に属する。")
     _download_csv_button(
         wide_display.reset_index().rename(columns={"index": "metric"}),
         "tab2_summary.csv",
