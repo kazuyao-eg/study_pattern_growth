@@ -229,35 +229,12 @@ def _download_csv_button(df: pd.DataFrame, filename: str, label: str) -> None:
 
 
 def _bins_6(s: pd.Series) -> Tuple[pd.Series, List[str]]:
-    s_num = _to_number(s)
-    valid = s_num.dropna()
-    if valid.empty:
-        binned = pd.Series([np.nan] * len(s_num), index=s_num.index)
-        return binned, []
-
-    vmin = float(valid.min())
-    vmax = float(valid.max())
-    if vmin == vmax:
-        label = f"{vmin:g}"
-        binned = pd.Series([label if np.isfinite(x) else np.nan for x in s_num], index=s_num.index)
-        return binned, [label]
-
-    edges = np.linspace(vmin, vmax, 7)
-    labels = []
-    for i in range(6):
-        a = edges[i]
-        b = edges[i + 1]
-        if i == 0:
-            labels.append(f"{a:g}–{b:g}")
-        else:
-            labels.append(f"{a:g}–{b:g}")
-    binned = pd.cut(s_num, bins=edges, labels=labels, include_lowest=True, duplicates="drop")
-    binned = binned.astype(object)
-    return binned, labels
+    """数値の6分割。境界は小数第3位を四捨五入し第2位まで（サマリー表・ヒートマップ共通）。"""
+    return _bins_6_heatmap_rounded(s)
 
 
 def _bins_6_heatmap_rounded(s: pd.Series) -> Tuple[pd.Series, List[str]]:
-    """ヒートマップ用: 数値の6分割。境界は小数第3位を四捨五入し第2位まで。"""
+    """数値の6分割。境界は小数第3位を四捨五入し第2位まで。"""
     s_num = _to_number(s)
     valid = s_num.dropna()
     if valid.empty:
@@ -301,7 +278,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
     if _is_numeric_series(s):
         group, order = _bins_6(s)
         grouped = df.assign(_group=group)
-        columns = [x for x in order if x in grouped["_group"].dropna().unique().tolist()]
+        columns = list(order)
     else:
         grouped = df.assign(_group=s.astype(str))
         columns = sorted([x for x in grouped["_group"].dropna().unique().tolist() if x != ""])
