@@ -281,13 +281,13 @@ def _bins_6_heatmap_rounded(s: pd.Series) -> Tuple[pd.Series, List[str]]:
 def _tab2_summary(df: pd.DataFrame) -> None:
     st.subheader("サマリー表")
     item = st.selectbox(
-        "列を選択する",
+        "列を選ぶ",
         options=TAB2_GROUP_COLS,
         index=TAB2_GROUP_COLS.index("学習日数") if "学習日数" in TAB2_GROUP_COLS else 0,
         key="tab2_column_select",
     )
     corr_item = st.selectbox(
-        "相関係数を算出する項目を選択する",
+        "相関係数を算出する項目を選ぶ",
         options=TAB2_CORRELATION_COLS,
         index=TAB2_CORRELATION_COLS.index("学習日数") if "学習日数" in TAB2_CORRELATION_COLS else 0,
         key="tab2_correlation_select",
@@ -410,21 +410,21 @@ def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
     c1, c2, c3 = st.columns(3)
     with c1:
         x = st.selectbox(
-            "横軸の項目",
+            "横軸の項目を選ぶ",
             options=FILTER_COLS,
             index=FILTER_COLS.index("学習日数"),
             key="tab3_x_axis",
         )
     with c2:
         y = st.selectbox(
-            "縦軸の項目",
+            "縦軸の項目を選ぶ",
             options=FILTER_COLS,
             index=FILTER_COLS.index("Post_Pre"),
             key="tab3_y_axis",
         )
     with c3:
         color = st.selectbox(
-            "色（点の大きさ）の項目",
+            "色（点の大きさ）の項目を選ぶ",
             options=FILTER_COLS,
             index=FILTER_COLS.index(EFFICIENCY_COL),
             key="tab3_color_size",
@@ -477,14 +477,14 @@ def _tab4_scatter(df: pd.DataFrame) -> None:
     c1, c2 = st.columns(2)
     with c1:
         x = st.selectbox(
-            "横軸の項目",
+            "横軸の項目を選ぶ",
             options=FILTER_COLS,
             index=FILTER_COLS.index("学習日数"),
             key="tab4_x_axis",
         )
     with c2:
         y = st.selectbox(
-            "縦軸の項目",
+            "縦軸の項目を選ぶ",
             options=FILTER_COLS,
             index=FILTER_COLS.index(EFFICIENCY_COL),
             key="tab4_y_axis",
