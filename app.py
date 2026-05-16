@@ -171,7 +171,7 @@ def build_table_from_excel(uploaded) -> BuildResult:
 
     out = pd.concat(tables, axis=0, ignore_index=True)
     if list(out.columns) != FINAL_COLS:
-        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。)", loaded_sheets=loaded, skipped_sheets=skipped)
+        return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。列名と列構成が正しいかを確認してください。", loaded_sheets=loaded, skipped_sheets=skipped)
 
     if out.isna().all(axis=None):
         return BuildResult(df=None, error="アップロードされたExcelファイルに誤りがあります。ファイル内に有効なデータがありません。", loaded_sheets=loaded, skipped_sheets=skipped)
