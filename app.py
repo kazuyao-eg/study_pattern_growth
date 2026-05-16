@@ -35,6 +35,8 @@ FILTER_COLS = [
     EFFICIENCY_COL,
 ]
 
+TAB2_SUMMARY_COLS = ["Pre", "Post", "Post_Pre", EFFICIENCY_COL]
+
 APP_TITLE = "学習パターン（時間）と英語力向上 の分析"
 
 
@@ -269,8 +271,8 @@ def _tab2_summary(df: pd.DataFrame) -> None:
     st.subheader("サマリー表")
     item = st.selectbox(
         "列を選択する",
-        options=FILTER_COLS,
-        index=FILTER_COLS.index("学習日数") if "学習日数" in FILTER_COLS else 0,
+        options=TAB2_SUMMARY_COLS,
+        index=TAB2_SUMMARY_COLS.index("Post_Pre") if "Post_Pre" in TAB2_SUMMARY_COLS else 0,
         key="tab2_column_select",
     )
 
@@ -303,7 +305,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
                 "median": float(np.nanmedian(pp.values)) if pp.notna().any() else np.nan,
                 "mean": float(np.nanmean(pp.values)) if pp.notna().any() else np.nan,
                 "var": float(np.nanvar(pp.values, ddof=1)) if pp.notna().sum() >= 2 else np.nan,
-                "pearson": _pearson(sub["Post_Pre"], sub["学習日数"]),
+                "pearson": _pearson(sub["Post_Pre"], sub[item]),
             }
         )
 
