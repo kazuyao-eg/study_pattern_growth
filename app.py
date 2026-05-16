@@ -340,6 +340,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
         wide_display.loc["該当人数"] = wide_display.loc["該当人数"].astype(int)
 
     st.dataframe(wide_display, use_container_width=True)
+    st.caption("※「点数変化」と「相関係数を算出する項目」で選んだ項目の相関係数が表示されています。")
     st.caption("※分散・・・データの散らばり具合を表します。分散の値が大きいほどデータが散らばっています。")
     st.caption("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
     st.caption("※「列を選択する」で「Pre」、「Post」、「Pre-Post」を選択した際、列の境界と一致する値は左側の列に属します。例：列が「0-10」「10-20」、、の時は「10」の値は「0-10」に属する。")
