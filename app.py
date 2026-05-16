@@ -35,7 +35,7 @@ FILTER_COLS = [
     EFFICIENCY_COL,
 ]
 
-TAB2_SUMMARY_COLS = ["Pre", "Post", "Post_Pre", EFFICIENCY_COL]
+TAB2_SUMMARY_COLS = ["学習日数", "Pre", "Post", "Post_Pre", EFFICIENCY_COL]
 
 APP_TITLE = "学習パターン（時間）と英語力向上 の分析"
 
@@ -272,7 +272,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
     item = st.selectbox(
         "列を選択する",
         options=TAB2_SUMMARY_COLS,
-        index=TAB2_SUMMARY_COLS.index("Post_Pre") if "Post_Pre" in TAB2_SUMMARY_COLS else 0,
+        index=TAB2_SUMMARY_COLS.index("学習日数") if "学習日数" in TAB2_SUMMARY_COLS else 0,
         key="tab2_column_select",
     )
 
