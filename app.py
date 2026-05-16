@@ -310,15 +310,19 @@ def _tab2_summary(df: pd.DataFrame) -> None:
         st.info("選択した項目の有効データが不足しています。")
         return
 
+    total_n = int(df["ID"].nunique()) if "ID" in df.columns else len(df)
+
     rows = []
     for g in columns:
         sub = grouped[grouped["_group"] == g]
         pp = _to_number(sub["Post_Pre"])
         id_count = int(sub["ID"].nunique()) if "ID" in sub.columns else int(len(sub))
+        pct_share = (id_count / total_n * 100.0) if total_n > 0 else np.nan
         rows.append(
             {
                 "group": g,
                 "n_ids": id_count,
+                "pct": pct_share,
                 "median": float(np.nanmedian(pp.values)) if pp.notna().any() else np.nan,
                 "mean": float(np.nanmean(pp.values)) if pp.notna().any() else np.nan,
                 "var": float(np.nanvar(pp.values, ddof=1)) if pp.notna().sum() >= 2 else np.nan,
@@ -327,11 +331,11 @@ def _tab2_summary(df: pd.DataFrame) -> None:
         )
 
     m = pd.DataFrame(rows).set_index("group")
-    wide = m[["n_ids", "median", "mean", "var", "pearson"]].T
-    wide.index = ["該当人数", "中央値", "平均", "分散", "相関係数（ピアソン）"]
+    wide = m[["n_ids", "pct", "median", "mean", "var", "pearson"]].T
+    wide.index = ["該当人数", "全体に対する割合（％）", "中央値", "平均", "分散", "相関係数（ピアソン）"]
 
     wide_display = wide.copy()
-    for r in ["中央値", "平均", "分散", "相関係数（ピアソン）"]:
+    for r in ["全体に対する割合（％）", "中央値", "平均", "分散", "相関係数（ピアソン）"]:
         if r in wide_display.index:
             wide_display.loc[r] = wide_display.loc[r].map(
                 lambda v: np.nan if (isinstance(v, float) and np.isnan(v)) else _round_half_up_2(v)
