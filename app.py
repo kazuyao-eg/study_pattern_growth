@@ -203,20 +203,20 @@ def _apply_filters(df: pd.DataFrame) -> pd.DataFrame:
             vmax = float(np.nanmax(s_num.values)) if s_num.notna().any() else 0.0
             if np.isfinite(vmin) and np.isfinite(vmax) and vmin != vmax:
                 lo, hi = st.sidebar.slider(
-                    f"フィルター: {col}",
+                    f" {col}",
                     min_value=float(vmin),
                     max_value=float(vmax),
                     value=(float(vmin), float(vmax)),
                 )
                 out = out[s_num.between(lo, hi, inclusive="both") | s_num.isna()]
             else:
-                st.sidebar.caption(f"フィルター: {col}（絞り込み不可: 値が単一または欠損のみ）")
+                st.sidebar.caption(f"{col}（絞り込み不可: 値が単一または欠損のみ）")
         else:
             cats = sorted([x for x in s.dropna().astype(str).unique().tolist() if x != ""])
             if len(cats) == 0:
-                st.sidebar.caption(f"フィルター: {col}（絞り込み不可: 値なし）")
+                st.sidebar.caption(f"{col}（絞り込み不可: 値なし）")
                 continue
-            selected = st.sidebar.multiselect(f"フィルター: {col}", options=cats, default=cats)
+            selected = st.sidebar.multiselect(f"{col}", options=cats, default=cats)
             if selected:
                 out = out[s.astype(str).isin(selected) | s.isna()]
 
@@ -291,7 +291,7 @@ def _bins_6_heatmap_rounded(s: pd.Series) -> Tuple[pd.Series, List[str]]:
 def _tab2_summary(df: pd.DataFrame) -> None:
     st.subheader("サマリー表")
     item = st.selectbox(
-        "列を選択",
+        "列を選択する",
         options=FILTER_COLS,
         index=FILTER_COLS.index("学習日数") if "学習日数" in FILTER_COLS else 0,
         key="tab2_column_select",
@@ -346,7 +346,7 @@ def _tab2_summary(df: pd.DataFrame) -> None:
     st.dataframe(wide_display, use_container_width=True)
     st.caption("※分散・・・データの散らばり具合を表します。分散の値が大きいほどデータが散らばっています。")
     st.caption("※該当人数が1人以下の場合は分散と相関係数は算出されません。")
-    st.caption("※「列を選択」で「Pre」、「Post」、「Pre-Post」を選択した際、列の境界と一致する値は左側の列に属します。\n　例：列が「0-10」「10-20」、、、の時は「10」の値は「0-10」に属する。")
+    st.caption("※「列を選択する」で「Pre」、「Post」、「Pre-Post」を選択した際、列の境界と一致する値は左側の列に属します。\n　例：列が「0-10」「10-20」、、、の時は「10」の値は「0-10」に属する。")
     _download_csv_button(
         wide_display.reset_index().rename(columns={"index": "metric"}),
         "tab2_summary.csv",
