@@ -424,7 +424,7 @@ def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
         )
     with c3:
         color = st.selectbox(
-            "色(点の大きさ)の項目",
+            "色（点の大きさ）の項目",
             options=FILTER_COLS,
             index=FILTER_COLS.index(EFFICIENCY_COL),
             key="tab3_color_size",
