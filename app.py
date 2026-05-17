@@ -48,6 +48,8 @@ TAB2_GROUP_COLS = [
 
 TAB2_CORRELATION_COLS = ["学習日数", "Pre", "Post", "Post_Pre", EFFICIENCY_COL]
 
+TAB3_SIZE_COLS = ["学習日数", "Pre", "Post", "Post_Pre", EFFICIENCY_COL]
+
 APP_TITLE = "学習パターン（時間）と英語力向上 の分析"
 
 
@@ -425,8 +427,8 @@ def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
     with c3:
         color = st.selectbox(
             "色（点の大きさ）の項目を選ぶ",
-            options=FILTER_COLS,
-            index=FILTER_COLS.index(EFFICIENCY_COL),
+            options=TAB3_SIZE_COLS,
+            index=TAB3_SIZE_COLS.index(EFFICIENCY_COL) if EFFICIENCY_COL in TAB3_SIZE_COLS else 0,
             key="tab3_color_size",
         )
 
@@ -459,13 +461,23 @@ def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
 
     hover_cols = ["ID", "Test_Type"] + FILTER_COLS
     scatter_df = df.copy()
+    scatter_df["_plot_x"] = (
+        _to_number(scatter_df[x]) if _is_numeric_series(scatter_df[x]) else scatter_df[x].astype(str)
+    )
+    scatter_df["_plot_y"] = (
+        _to_number(scatter_df[y]) if _is_numeric_series(scatter_df[y]) else scatter_df[y].astype(str)
+    )
+    scatter_df["_plot_size"] = _to_number(scatter_df[color])
     fig_scatter = px.scatter(
         scatter_df,
-        x=_to_number(scatter_df[x]) if _is_numeric_series(scatter_df[x]) else scatter_df[x].astype(str),
-        y=_to_number(scatter_df[y]) if _is_numeric_series(scatter_df[y]) else scatter_df[y].astype(str),
+        x="_plot_x",
+        y="_plot_y",
+        size="_plot_size",
+        size_max=28,
+        labels={"_plot_x": x, "_plot_y": y, "_plot_size": color},
         hover_data={c: True for c in hover_cols},
     )
-    fig_scatter.update_traces(marker=dict(color="#636EFA", size=8), selector=dict(mode="markers"))
+    fig_scatter.update_traces(marker=dict(color="#636EFA"), selector=dict(mode="markers"))
     fig_scatter.update_layout(height=800)
     if _is_numeric_series(scatter_df[x]) and _is_numeric_series(scatter_df[y]):
         fig_scatter.update_yaxes(scaleanchor="x", scaleratio=1)
