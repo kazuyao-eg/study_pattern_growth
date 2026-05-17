@@ -108,6 +108,25 @@ def _to_number(s: pd.Series) -> pd.Series:
     return pd.to_numeric(s.astype(str).str.replace(",", "", regex=False), errors="coerce")
 
 
+def _marker_sizes_for_plot(s: pd.Series, size_max: float = 28.0, size_min: float = 6.0) -> pd.Series:
+    """Plotly の size 用。負の値や NaN を含む列を、表示用の正のピクセルサイズに変換する。"""
+    s_num = _to_number(s)
+    out = pd.Series(np.nan, index=s_num.index, dtype=float)
+    valid_mask = s_num.notna() & np.isfinite(s_num)
+    if not valid_mask.any():
+        return out.fillna((size_min + size_max) / 2.0)
+    vmin = float(s_num[valid_mask].min())
+    vmax = float(s_num[valid_mask].max())
+    mid = (size_min + size_max) / 2.0
+    if vmin == vmax:
+        out.loc[valid_mask] = mid
+    else:
+        scaled = (s_num[valid_mask] - vmin) / (vmax - vmin)
+        out.loc[valid_mask] = size_min + scaled * (size_max - size_min)
+    out.loc[~valid_mask] = size_min
+    return out
+
+
 def _pearson(x: pd.Series, y: pd.Series) -> float:
     x = _to_number(x)
     y = _to_number(y)
@@ -467,17 +486,17 @@ def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
     scatter_df["_plot_y"] = (
         _to_number(scatter_df[y]) if _is_numeric_series(scatter_df[y]) else scatter_df[y].astype(str)
     )
-    scatter_df["_plot_size"] = _to_number(scatter_df[color])
+    scatter_df["_plot_size"] = _marker_sizes_for_plot(scatter_df[color])
     fig_scatter = px.scatter(
         scatter_df,
         x="_plot_x",
         y="_plot_y",
         size="_plot_size",
         size_max=28,
-        labels={"_plot_x": x, "_plot_y": y, "_plot_size": color},
+        labels={"_plot_x": x, "_plot_y": y, "_plot_size": f"{color}（点の大きさ）"},
         hover_data={c: True for c in hover_cols},
     )
-    fig_scatter.update_traces(marker=dict(color="#636EFA"), selector=dict(mode="markers"))
+    fig_scatter.update_traces(marker_color="#636EFA", selector=dict(mode="markers"))
     fig_scatter.update_layout(height=800)
     if _is_numeric_series(scatter_df[x]) and _is_numeric_series(scatter_df[y]):
         fig_scatter.update_yaxes(scaleanchor="x", scaleratio=1)
