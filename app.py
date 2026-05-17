@@ -279,7 +279,7 @@ def _bins_6_heatmap_rounded(s: pd.Series) -> Tuple[pd.Series, List[str]]:
 
 
 def _tab2_summary(df: pd.DataFrame) -> None:
-    st.subheader("サマリー表と折れ線グラフ")
+    ##st.subheader("サマリー表と折れ線グラフ")
     item = st.selectbox(
         "列を選ぶ",
         options=TAB2_GROUP_COLS,
@@ -406,7 +406,7 @@ def _heatmap_table(df: pd.DataFrame, x: str, y: str, z: str) -> Tuple[pd.DataFra
 
 
 def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
-    st.subheader("3項目のヒートマップと散布図")
+    ##st.subheader("3項目のヒートマップと散布図")
     c1, c2, c3 = st.columns(3)
     with c1:
         x = st.selectbox(
@@ -473,7 +473,7 @@ def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
 
 
 def _tab4_scatter(df: pd.DataFrame) -> None:
-    st.subheader("2項目の散布図")
+    ##st.subheader("2項目の散布図")
     c1, c2 = st.columns(2)
     with c1:
         x = st.selectbox(
