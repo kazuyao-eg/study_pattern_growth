@@ -279,7 +279,7 @@ def _bins_6_heatmap_rounded(s: pd.Series) -> Tuple[pd.Series, List[str]]:
 
 
 def _tab2_summary(df: pd.DataFrame) -> None:
-    ##st.subheader("サマリー表")
+    st.subheader("サマリー表と折れ線グラフ")
     item = st.selectbox(
         "列を選ぶ",
         options=TAB2_GROUP_COLS,
@@ -543,7 +543,7 @@ def main() -> None:
     tabs = st.tabs(
         [
             "Excelファイルのアップロード",
-            "サマリー表と折線グラフ",
+            "サマリー表と折れ線グラフ",
             "3項目のヒートマップと散布図",
             "2項目の散布図",
         ]
