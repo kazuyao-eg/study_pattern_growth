@@ -463,6 +463,7 @@ def _tab3_heatmap_scatter(df: pd.DataFrame) -> None:
         scatter_df,
         x=_to_number(scatter_df[x]) if _is_numeric_series(scatter_df[x]) else scatter_df[x].astype(str),
         y=_to_number(scatter_df[y]) if _is_numeric_series(scatter_df[y]) else scatter_df[y].astype(str),
+        size=_to_number(scatter_df[color]),
         hover_data={c: True for c in hover_cols},
     )
     fig_scatter.update_traces(marker=dict(color="#636EFA", size=8), selector=dict(mode="markers"))
